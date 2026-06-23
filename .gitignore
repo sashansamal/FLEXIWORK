@@ -1,0 +1,24 @@
+# Maven
+target/
+*.log
+boot.log
+
+# Uploads (user-generated KYC files, QR images)
+uploads/
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+frontend/vite.log
+
+# WhatsApp linked-device session — tied to one phone number, never share/commit
+whatsapp-service/session/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
