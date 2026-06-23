@@ -1,0 +1,8 @@
+target/
+frontend/
+whatsapp-service/
+uploads/
+*.log
+.git/
+.idea/
+.vscode/
