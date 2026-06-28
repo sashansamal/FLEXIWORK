@@ -156,6 +156,23 @@ app.post('/send', authMiddleware, async (req, res) => {
 
   try {
     const jid = formatNumber(to);
+
+
+    let onWa;
+    try {
+      onWa = await sock.onWhatsApp(jid);
+    } catch (e) {
+      console.warn(`onWhatsApp lookup failed for ${jid}: ${e.message}`);
+      onWa = null;
+    }
+    if (onWa !== null) {
+      const registered = Array.isArray(onWa) && onWa.some((r) => r && r.exists && r.jid);
+      if (!registered) {
+        console.warn(`Number not on WhatsApp: ${jid}`);
+        return res.status(422).json({ error: 'This number is not registered on WhatsApp.' });
+      }
+    }
+
     await sock.sendMessage(jid, { text: message });
     console.log(`Message sent to: ${jid}`);
     res.json({ success: true, sentTo: jid });
