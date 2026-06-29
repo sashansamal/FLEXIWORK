@@ -913,6 +913,8 @@ th { color: var(--text-muted); font-weight: 700; font-size: 12px; text-transform
   background: var(--text); color: #fff; font-size: 12px; font-weight: 700;
   text-transform: uppercase; letter-spacing: .08em; padding: 11px 20px;
 }
+/* Dark mode: --text flips to light, so pin a dark bar with light text */
+[data-theme="dark"] .pj-preview-bar { background: #0B0F19; color: #F3F4F6; }
 .pj-preview-body { padding: 22px 22px 24px; }
 .pj-preview-title { font-size: 23px; font-weight: 800; color: var(--text); letter-spacing: -.4px; line-height: 1.2; }
 .pj-preview-title.is-empty { color: var(--text-muted); font-weight: 700; }
