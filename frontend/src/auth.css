@@ -293,6 +293,37 @@
 }
 .wr-note-check { flex: 0 0 auto; color: var(--red); font-weight: 800; }
 
+/* Segmented OTP entry (step 3) */
+.wr-otp { display: flex; gap: 12px; }
+.wr-otp-box {
+  flex: 1 1 0; min-width: 0; height: 62px; padding: 0;
+  text-align: center; font-size: 24px; font-weight: 700; font-family: inherit; color: var(--ink);
+  border: 1.5px solid var(--line-2); border-radius: 14px; background: var(--surface);
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+.wr-otp-box:focus { outline: none; border-color: var(--red); background: #fff; box-shadow: 0 0 0 3px var(--red-tint); }
+.wr-otp-box:disabled { opacity: .6; }
+
+/* Side-by-side secondary actions + back/login row (step 3) */
+.wr-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.wr-btn-row .auth-btn-ghost { margin-top: 12px; }
+.wr-ghost-red { color: var(--red); }
+.wr-foot-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 18px; font-size: 13.5px; color: var(--muted);
+}
+.wr-foot-row a { color: var(--red); font-weight: 700; }
+.wr-back-link {
+  background: none; border: none; cursor: pointer; padding: 0;
+  color: var(--muted); font-weight: 700; font-size: 13.5px; font-family: inherit;
+}
+.wr-back-link:hover { color: var(--ink); }
+
+@media (max-width: 560px) {
+  .wr-otp { gap: 8px; }
+  .wr-otp-box { height: 54px; font-size: 20px; }
+}
+
 @media (max-width: 860px) {
   .wr-shell { flex-direction: column; max-width: 540px; }
   .wr-side { flex-basis: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 20px 24px; }
@@ -317,6 +348,10 @@
 [data-theme="dark"] .wr-file-title { color: #F3F4F6; }
 [data-theme="dark"] .wr-file-btn { background: #1F2937; }
 [data-theme="dark"] .wr-note { background: #2C1210; color: #D1D5DB; }
+[data-theme="dark"] .wr-otp-box { background: #111827; border-color: #4B5563; color: #F3F4F6; }
+[data-theme="dark"] .wr-otp-box:focus { background: #0d1421; border-color: #EB1700; box-shadow: 0 0 0 3px #2C1210; }
+[data-theme="dark"] .wr-back-link { color: #9CA3AF; }
+[data-theme="dark"] .wr-back-link:hover { color: #F3F4F6; }
 
 /* ── AUTH DARK MODE ── */
 [data-theme="dark"] .auth-card {

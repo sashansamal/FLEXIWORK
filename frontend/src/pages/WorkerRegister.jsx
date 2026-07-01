@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, ApiError } from '../api';
 import { useAuth } from '../auth';
@@ -66,6 +66,65 @@ function FileRow({ title, file, onPick }) {
       <span className="wr-file-btn">Choose file</span>
       <input type="file" accept="image/*" hidden onChange={(e) => onPick(e.target.files[0])} />
     </label>
+  );
+}
+
+// Segmented 6-box code entry. Keeps the joined digits in the parent's `otp` string;
+// handles typing/auto-advance, backspace, arrow keys and paste.
+function OtpInput({ value, onChange, length = 6, disabled }) {
+  const refs = useRef([]);
+  const chars = Array.from({ length }, (_, i) => value[i] || '');
+
+  function setChar(i, ch) {
+    const next = chars.slice();
+    next[i] = ch;
+    onChange(next.join('').slice(0, length));
+  }
+
+  function handleChange(i, e) {
+    const digits = e.target.value.replace(/\D/g, '');
+    if (!digits) { setChar(i, ''); return; }
+    setChar(i, digits[digits.length - 1]);
+    if (i < length - 1) refs.current[i + 1]?.focus();
+  }
+
+  function handleKeyDown(i, e) {
+    if (e.key === 'Backspace' && !chars[i] && i > 0) {
+      refs.current[i - 1]?.focus();
+      setChar(i - 1, '');
+    } else if (e.key === 'ArrowLeft' && i > 0) {
+      refs.current[i - 1]?.focus();
+    } else if (e.key === 'ArrowRight' && i < length - 1) {
+      refs.current[i + 1]?.focus();
+    }
+  }
+
+  function handlePaste(e) {
+    e.preventDefault();
+    const digits = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, length);
+    if (!digits) return;
+    onChange(digits);
+    refs.current[Math.min(digits.length, length - 1)]?.focus();
+  }
+
+  return (
+    <div className="wr-otp" onPaste={handlePaste}>
+      {chars.map((c, i) => (
+        <input
+          key={i}
+          ref={(el) => (refs.current[i] = el)}
+          className="wr-otp-box"
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={1}
+          value={c}
+          disabled={disabled}
+          onChange={(e) => handleChange(i, e)}
+          onKeyDown={(e) => handleKeyDown(i, e)}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -207,7 +266,13 @@ export default function WorkerRegister() {
         {/* ── Right white form panel ── */}
         <section className="wr-panel">
           <h1 className="wr-title">{meta.title}</h1>
-          <p className="wr-sub">{meta.sub}</p>
+          {step === 3 ? (
+            <p className="wr-sub">
+              Step 3 of 3 — we sent a 6-digit code to <strong>{details.whatsappNumber || 'your WhatsApp'}</strong>.
+            </p>
+          ) : (
+            <p className="wr-sub">{meta.sub}</p>
+          )}
 
           {err && <div className="auth-msg-err">{err}</div>}
 
@@ -307,19 +372,30 @@ export default function WorkerRegister() {
 
           {step === 3 && (
             <>
-              <p className="auth-hint">We sent a 6-digit code to {details.whatsappNumber}.</p>
-              <div className="auth-field"><label>Verification code</label>
-                <input className="auth-input" value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="123456" /></div>
-              {resendMsg && <p className="auth-hint">{resendMsg}</p>}
-              <button className="auth-btn" disabled={busy} onClick={verifyOtp}>{busy ? 'Verifying…' : 'Verify & finish'}</button>
-              <button className="auth-btn-ghost" disabled={busy || resendCooldown > 0} onClick={resendOtp}>
-                {resendCooldown > 0 ? `Resend code (${resendCooldown}s)` : 'Resend code'}
+              <div className="wr-field"><label>Verification code</label>
+                <OtpInput value={otp} onChange={setOtp} disabled={busy} /></div>
+              <p className="auth-hint">
+                {resendMsg || 'Enter the code exactly as received.'}
+              </p>
+              <button className="auth-btn" disabled={busy || otp.length < 6} onClick={verifyOtp}>
+                {busy ? 'Verifying…' : 'Verify & finish'}
               </button>
-              <button className="auth-btn-ghost" onClick={() => navigate('/worker/applications')}>Skip for now</button>
+              <div className="wr-btn-row">
+                <button className="auth-btn-ghost wr-ghost-red" disabled={busy || resendCooldown > 0} onClick={resendOtp}>
+                  {resendCooldown > 0 ? `Resend code (${resendCooldown}s)` : 'Resend code'}
+                </button>
+                <button className="auth-btn-ghost" disabled={busy} onClick={() => navigate('/worker/applications')}>
+                  Skip for now
+                </button>
+              </div>
+              <div className="wr-foot-row">
+                <button type="button" className="wr-back-link" onClick={() => setStep(2)}>← Back</button>
+                <span>Already registered? <a href="/login">Log in</a></span>
+              </div>
             </>
           )}
 
-          <div className="auth-foot">Already registered? <a href="/login">Log in</a></div>
+          {step !== 3 && <div className="auth-foot">Already registered? <a href="/login">Log in</a></div>}
         </section>
       </div>
     </div>
