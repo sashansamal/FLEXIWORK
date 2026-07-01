@@ -453,13 +453,14 @@ function PasswordPanel({ email, showToast }) {
   }
 
   const checks = {
-    len:    newPwd.length >= 8 && newPwd.length <= 13,
-    letter: /[A-Za-z]/.test(newPwd),
-    num:    /[0-9]/.test(newPwd),
+    len:  newPwd.length >= 8 && newPwd.length <= 12,
+    caps: /^[A-Z]/.test(newPwd),
+    num:  /\d/.test(newPwd),
+    sym:  /[@#$]/.test(newPwd),
   };
   const score = Object.values(checks).filter(Boolean).length;
-  const STRENGTH_LABELS = ['', 'Weak', 'Fair', 'Strong'];
-  const STRENGTH_COLORS = ['', '#EB1700', '#D97706', '#1F8A5B'];
+  const STRENGTH_LABELS = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+  const STRENGTH_COLORS = ['', '#EB1700', '#D97706', '#D97706', '#1F8A5B'];
 
   function reset() { setStep(1); setOtp(''); setNewPwd(''); setConfirmPwd(''); }
 
@@ -486,13 +487,13 @@ function PasswordPanel({ email, showToast }) {
           <div className="wd-fld">
             <label>New Password</label>
             <div className="wd-pwd-eye">
-              <input type={showNew ? 'text' : 'password'} maxLength={13} value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="Choose a strong password" required />
+              <input type={showNew ? 'text' : 'password'} maxLength={12} value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="Choose a strong password" required />
               <button type="button" className="wd-eye-toggle" onClick={() => setShowNew(v => !v)}><IcoEye /></button>
             </div>
             {newPwd && (
               <div className="wd-pwd-strength">
                 <div className="wd-pwd-bars">
-                  {[1,2,3].map(i => (
+                  {[1,2,3,4].map(i => (
                     <div key={i} className="wd-pwd-bar" style={{ background: i <= score ? STRENGTH_COLORS[score] : undefined }} />
                   ))}
                 </div>
@@ -500,7 +501,7 @@ function PasswordPanel({ email, showToast }) {
               </div>
             )}
             <div className="wd-pwd-rules">
-              {[['len','8-13 characters'],['letter','One letter'],['num','One number']].map(([k,label]) => (
+              {[['len','8–12 characters'],['caps','Starts with capital'],['num','One number'],['sym','One symbol (@ # $)']].map(([k,label]) => (
                 <div key={k} className={`wd-pwd-rule${checks[k] ? ' met' : ''}`}>
                   {checks[k] ? <IcoCheckSm /> : <IcoCircle />} {label}
                 </div>
@@ -522,7 +523,7 @@ function PasswordPanel({ email, showToast }) {
           </div>
 
           <div className="wd-form-actions">
-            <button className="wd-btn wd-btn-primary" type="submit" disabled={loading}>{loading ? 'Updating…' : 'Update Password'}</button>
+            <button className="wd-btn wd-btn-primary" type="submit" disabled={loading || score < 4 || newPwd !== confirmPwd}>{loading ? 'Updating…' : 'Update Password'}</button>
             <button className="wd-btn wd-btn-ghost" type="button" onClick={reset}>Cancel</button>
           </div>
         </form>
