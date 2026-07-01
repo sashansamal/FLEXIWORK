@@ -15,7 +15,7 @@ const SIDE_STEPS = [
 // Heading + subtitle for the white panel, per step.
 const PANEL_META = {
   1: { title: 'Create your worker profile', sub: 'Step 1 of 3 — tell us who you are.' },
-  2: { title: 'Upload your documents', sub: 'Step 2 of 3 — clear photos of your NIC.' },
+  2: { title: 'Upload your documents', sub: 'Step 2 of 3 — clear photos of your NIC. JPG or PNG, max 5MB each.' },
   3: { title: 'Verify your WhatsApp', sub: 'Step 3 of 3 — enter the code we sent.' },
 };
 
@@ -40,6 +40,32 @@ function PhotoGlyph() {
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" />
     </svg>
+  );
+}
+
+function ImageGlyph() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <circle cx="8.5" cy="8.5" r="1.6" />
+      <path d="M21 15l-5-5L5 21" />
+    </svg>
+  );
+}
+
+// A styled NIC upload row: hidden native input, image icon, filename, "Choose file" button.
+function FileRow({ title, file, onPick }) {
+  return (
+    <label className={`wr-file ${file ? 'has' : ''}`}>
+      <span className="wr-file-icon"><ImageGlyph /></span>
+      <span className="wr-file-text">
+        <span className="wr-file-title">{title}</span>
+        <span className="wr-file-name">{file ? file.name : 'No file chosen'}</span>
+      </span>
+      <span className="wr-file-btn">Choose file</span>
+      <input type="file" accept="image/*" hidden onChange={(e) => onPick(e.target.files[0])} />
+    </label>
   );
 }
 
@@ -262,17 +288,20 @@ export default function WorkerRegister() {
 
           {step === 2 && (
             <>
-              <p className="auth-hint">Upload clear photos of your NIC. JPG/PNG, max 5MB each.</p>
-              <div className="auth-field"><label>NIC — front</label>
-                <input className="auth-input" type="file" accept="image/*" onChange={(e) => setFiles({ ...files, nicFront: e.target.files[0] })} />
-                {files.nicFront && <div className="auth-file-chip">📄 {files.nicFront.name}</div>}</div>
-              <div className="auth-field"><label>NIC — back</label>
-                <input className="auth-input" type="file" accept="image/*" onChange={(e) => setFiles({ ...files, nicBack: e.target.files[0] })} />
-                {files.nicBack && <div className="auth-file-chip">📄 {files.nicBack.name}</div>}</div>
+              <FileRow title="NIC — front" file={files.nicFront}
+                onPick={(f) => setFiles({ ...files, nicFront: f })} />
+              <FileRow title="NIC — back" file={files.nicBack}
+                onPick={(f) => setFiles({ ...files, nicBack: f })} />
+
+              <div className="wr-note">
+                <span className="wr-note-check">✓</span>
+                We'll send a verification code to your WhatsApp after you submit.
+              </div>
+
               <button className="auth-btn" disabled={busy || !files.nicFront || !files.nicBack} onClick={submitRegistration}>
                 {busy ? 'Submitting…' : 'Submit & verify WhatsApp'}
               </button>
-              <button className="auth-btn-ghost" onClick={() => setStep(1)}>Back</button>
+              <button className="auth-btn-ghost" onClick={() => setStep(1)}>← Back</button>
             </>
           )}
 
